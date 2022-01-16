@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-domoticz-mqtt-broker.conf
+  namespace: domoticz
+data:
+  mosquitto.conf: |+
+    pid_file /var/run/mosquitto.pid
+    user mosquitto
+    message_size_limit 200
+    allow_zero_length_clientid false
+    allow_duplicate_messages false
+    port 1883
+    max_connections 1024
+    persistence true
+    persistence_location /tmp
+    log_dest file /tmp/mosquitto.log

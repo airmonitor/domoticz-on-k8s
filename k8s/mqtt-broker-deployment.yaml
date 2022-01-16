@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: domoticz-mqtt-broker
+  namespace: domoticz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: domoticz-mqtt-broker
+  template:
+    metadata:
+      labels:
+        service: domoticz
+        app: domoticz-mqtt-broker
+    spec:
+      volumes:
+        - name: domoticz-mqtt-broker-storage
+          persistentVolumeClaim:
+            claimName: domoticz-mqtt-broker-claim
+        - name: domoticz-mqtt-broker-config-file
+          configMap:
+            name: mosquitto-domoticz-mqtt-broker.conf
+            items:
+              - key: mosquitto.conf
+                path: mosquitto.conf
+      initContainers:
+        - name: mqtt-config-dir
+          image: busybox
+          volumeMounts:
+            - mountPath: /mosquitto
+              name: domoticz-mqtt-broker-storage
+          command: ["sh", "-c", "mkdir -p /mosquitto/config && chown -R 65534:65534 /mosquitto"]
+      containers:
+        - name: domoticz-mqtt-broker
+          startupProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 1883
+            timeoutSeconds: 3
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 1883
+            timeoutSeconds: 3
+          livenessProbe:
+            failureThreshold: 10
+            initialDelaySeconds: 5
+            periodSeconds: 60
+            successThreshold: 1
+            tcpSocket:
+              port: 1883
+            timeoutSeconds: 3
+          image: eclipse-mosquitto
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 1883
+              name: unencrypted
+            - containerPort: 9001
+              name: websockets
+          volumeMounts:
+            - mountPath: /mosquitto
+              name: domoticz-mqtt-broker-storage
+            - mountPath: /mosquitto/config
+              name: domoticz-mqtt-broker-config-file
+          resources:
+            limits:
+              cpu: "0.001"
+              memory: 5Mi
+            requests:
+              cpu: "0.001"
+              memory: 5Mi
+

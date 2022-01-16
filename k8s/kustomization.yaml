@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- mqtt-broker-config-map.yaml
+- mqtt-broker-deployment.yaml
+- mqtt-broker-pv.yaml
+- mqtt-broker-svc.yaml
+
+patches:
+  - kustomize-mqtt-broker-svc.yaml
+  - kustomize-mqtt-broker-deployment.yaml

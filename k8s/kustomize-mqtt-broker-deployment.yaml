@@ -1,0 +1,14 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: domoticz-mqtt-broker
+  namespace: domoticz
+spec:
+  selector: {}
+  template:
+    metadata: {}
+    spec:
+      containers:
+        - name: domoticz-mqtt-broker
+          image: eclipse-mosquitto:1.6.15
