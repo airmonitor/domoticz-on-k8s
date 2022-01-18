@@ -8,5 +8,4 @@ resources:
 - mqtt-broker-svc.yaml
 
 patches:
-  - kustomize-mqtt-broker-svc.yaml
   - kustomize-mqtt-broker-deployment.yaml
