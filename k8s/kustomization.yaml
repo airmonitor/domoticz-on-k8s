@@ -18,7 +18,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: eclipse-mosquitto:1.6.16
+        value: eclipse-mosquitto:1.6.15
   - target:
       kind: StatefulSet
       name: domoticz
