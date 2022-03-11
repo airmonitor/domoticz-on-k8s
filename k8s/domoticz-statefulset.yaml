@@ -1,0 +1,77 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: domoticz
+spec:
+  replicas: 1
+  serviceName: domoticz
+  selector:
+    matchLabels:
+      app: domoticz
+  template:
+    metadata:
+      labels:
+        service: domoticz
+        app: domoticz
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - node1
+      volumes:
+        - name: domoticz-local-storage-db
+          persistentVolumeClaim:
+            claimName: domoticz-db-local-storage-claim
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: domoticz
+          startupProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 3
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 3
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 60
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 3
+          image: registry.gitlab.com/airmonitor/domoticz:2021.1.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: "Europe/Warsaw"
+          ports:
+            - containerPort: 8080
+              name: gui
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            privileged: false
+          volumeMounts:
+            - mountPath: /domoticz_db
+              name: domoticz-local-storage-db
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              memory: 60Mi

@@ -6,6 +6,47 @@ resources:
 - mqtt-broker-deployment.yaml
 - mqtt-broker-pv.yaml
 - mqtt-broker-svc.yaml
+- domoticz-ingress.yaml
+- domoticz-pv.yaml
+- domoticz-statefulset.yaml
+- domoticz-svc.yaml
 
 patches:
-  - kustomize-mqtt-broker-deployment.yaml
+  - target:
+      kind: Deployment
+      name: domoticz-mqtt-broker
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: eclipse-mosquitto:1.6.16
+  - target:
+      kind: StatefulSet
+      name: domoticz
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: tomaszszuster/domoticz:2021.1.1
+      - op: replace
+        path: /spec/template/spec/affinity/nodeAffinity/requiredDuringSchedulingIgnoredDuringExecution/nodeSelectorTerms/0/matchExpressions/0/values/0
+        value: node2
+  - target:
+      kind: PersistentVolume
+      name: domoticz-db-local-storage
+    patch: |-
+      - op: replace
+        path: /spec/local/path
+        value: /mnt/k8s-local-storage/domoticz-on-k8s-db
+      - op: replace
+        path: /spec/nodeAffinity/required/nodeSelectorTerms/0/matchExpressions/0/values/0
+        value: node2
+  - target:
+      kind: Ingress
+      name: domoticz
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: domoticz.yourdomain.pl
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: domoticz.yourdomain.pl
+        

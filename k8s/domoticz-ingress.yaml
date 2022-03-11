@@ -1,0 +1,26 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: domoticz
+  labels:
+    app: domoticz
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: domoticz.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: domoticz
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - domoticz.yourdomain.com
+      secretName: domoticz-secret-tls
+
