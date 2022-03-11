@@ -27,7 +27,7 @@ spec:
       volumes:
         - name: domoticz-local-storage-db
           persistentVolumeClaim:
-            claimName: domoticz-db-local-storage-claim
+            claimName: domoticz-on-k8s-local-storage-claim
       terminationGracePeriodSeconds: 30
       containers:
         - name: domoticz

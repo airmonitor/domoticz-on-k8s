@@ -31,7 +31,7 @@ patches:
         value: node2
   - target:
       kind: PersistentVolume
-      name: domoticz-db-local-storage
+      name: domoticz-on-k8s-db-local-storage
     patch: |-
       - op: replace
         path: /spec/local/path

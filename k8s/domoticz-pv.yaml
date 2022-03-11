@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: domoticz-db-local-storage
+  name: domoticz-on-k8s-db-local-storage
 spec:
   capacity:
     storage: 200Mi
@@ -25,7 +25,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: domoticz-db-local-storage-claim
+  name: domoticz-on-k8s-local-storage-claim
 spec:
   accessModes:
     - ReadWriteOnce
