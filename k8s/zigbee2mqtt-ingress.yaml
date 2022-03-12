@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zigbee2mqtt
+  labels:
+    app: zigbee2mqtt
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: zigbee2mqtt.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zigbee2mqtt
+                port:
+                  number: 1890
+  tls:
+    - hosts:
+        - zigbee2mqtt.yourdomain.com
+      secretName: zigbee2mqtt-secret-tls

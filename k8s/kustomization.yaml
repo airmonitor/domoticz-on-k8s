@@ -10,6 +10,10 @@ resources:
 - domoticz-pv.yaml
 - domoticz-statefulset.yaml
 - domoticz-svc.yaml
+- zigbee2mqtt-ingress.yaml
+- zigbee2mqtt-pv.yaml
+- zigbee2mqtt-service.yaml
+- zigbee2mqtt-statefulset.yaml
 
 patches:
   - target:
@@ -49,4 +53,33 @@ patches:
       - op: replace
         path: /spec/tls/0/hosts/0
         value: domoticz.yourdomain.pl
-        
+  - target:
+      kind: Ingress
+      name: zigbee2mqtt
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: zigbee2mqtt.yourdomain.pl
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: zigbee2mqtt.yourdomain.pl
+  - target:
+      kind: PersistentVolume
+      name: zigbee2mqtt-on-k8s-local-storage
+    patch: |-
+      - op: replace
+        path: /spec/local/path
+        value: /mnt/k8s-local-storage/zigbee2mqtt-on-k8s
+      - op: replace
+        path: /spec/nodeAffinity/required/nodeSelectorTerms/0/matchExpressions/0/values/0
+        value: node2  
+  - target:
+      kind: StatefulSet
+      name: zigbee2mqtt
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: koenkk/zigbee2mqtt:1.24.0
+      - op: replace
+        path: /spec/template/spec/affinity/nodeAffinity/requiredDuringSchedulingIgnoredDuringExecution/nodeSelectorTerms/0/matchExpressions/0/values/0
+        value: node2

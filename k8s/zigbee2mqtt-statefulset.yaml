@@ -2,18 +2,18 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: domoticz
+  name: zigbee2mqtt
 spec:
   replicas: 1
-  serviceName: domoticz
+  serviceName: zigbee2mqtt
   selector:
     matchLabels:
-      app: domoticz
+      app: zigbee2mqtt
   template:
     metadata:
       labels:
         service: domoticz
-        app: domoticz
+        app: zigbee2mqtt
     spec:
       affinity:
         nodeAffinity:
@@ -25,19 +25,23 @@ spec:
                     values:
                       - node2
       volumes:
-        - name: domoticz-local-storage-db
+        - name: zigbee2mqtt-local-storage-storage
           persistentVolumeClaim:
-            claimName: domoticz-on-k8s-local-storage-claim
+            claimName: zigbee2mqtt-on-k8s-local-storage-claim
+        - name: ttyusb0
+          hostPath:
+            path: /dev/ttyUSB0
+            type: CharDevice
       terminationGracePeriodSeconds: 30
       containers:
-        - name: domoticz
+        - name: zigbee2mqtt
           startupProbe:
-            initialDelaySeconds: 20
+            initialDelaySeconds: 30
             periodSeconds: 10
             failureThreshold: 3
             successThreshold: 1
             tcpSocket:
-              port: 8080
+              port: 1890
             timeoutSeconds: 3
           readinessProbe:
             failureThreshold: 3
@@ -45,7 +49,7 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             tcpSocket:
-              port: 8080
+              port: 1890
             timeoutSeconds: 3
           livenessProbe:
             failureThreshold: 3
@@ -53,25 +57,27 @@ spec:
             periodSeconds: 60
             successThreshold: 1
             tcpSocket:
-              port: 8080
+              port: 1890
             timeoutSeconds: 3
-          image: registry.gitlab.com/airmonitor/domoticz:2021.1.1
+          image: koenkk/zigbee2mqtt:1.24.0
           imagePullPolicy: IfNotPresent
           env:
             - name: TZ
               value: "Europe/Warsaw"
           ports:
-            - containerPort: 8080
-              name: gui
+            - containerPort: 1890
+              name: zigbee2mqtt
           securityContext:
-            allowPrivilegeEscalation: false
+            allowPrivilegeEscalation: true
             readOnlyRootFilesystem: false
-            privileged: false
+            privileged: true
           volumeMounts:
-            - mountPath: /domoticz_db
-              name: domoticz-local-storage-db
+            - mountPath: /app/data
+              name: zigbee2mqtt-local-storage-storage
+            - mountPath: /dev/ttyUSB0
+              name: ttyusb0
           resources:
             limits:
-              memory: 100Mi
+              memory: 80Mi
             requests:
               memory: 60Mi
